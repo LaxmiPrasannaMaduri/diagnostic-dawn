@@ -3,34 +3,34 @@ import { Activity } from "lucide-react";
 import heartIcon from "@/assets/heart-icon.png";
 import kidneyIcon from "@/assets/kidney-icon.png";
 import diabetesIcon from "@/assets/diabetes-icon.png";
-import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const PredictionSection = () => {
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const diseases = [
     {
       title: "Heart Disease",
       description: "Predict cardiovascular disease risk based on vital signs and medical history",
       icon: heartIcon,
+      type: "heart",
     },
     {
       title: "Chronic Kidney Disease",
       description: "Assess kidney function and detect early signs of CKD using lab parameters",
       icon: kidneyIcon,
+      type: "kidney",
     },
     {
       title: "Diabetes Risk",
       description: "Evaluate diabetes probability using glucose levels and health indicators",
       icon: diabetesIcon,
+      type: "diabetes",
     },
   ];
 
-  const handlePredictionClick = (diseaseName: string) => {
-    toast({
-      title: "Feature Coming Soon",
-      description: `${diseaseName} prediction will be available once we integrate the AI backend.`,
-    });
+  const handlePredictionClick = (diseaseType: string) => {
+    navigate(`/predict?type=${diseaseType}`);
   };
 
   return (
@@ -56,7 +56,7 @@ const PredictionSection = () => {
               title={disease.title}
               description={disease.description}
               icon={disease.icon}
-              onClick={() => handlePredictionClick(disease.title)}
+              onClick={() => handlePredictionClick(disease.type)}
             />
           ))}
         </div>

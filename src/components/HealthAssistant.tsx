@@ -1,41 +1,19 @@
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Brain, Send, User, Bot } from "lucide-react";
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
+import { useHealthChat } from "@/hooks/useHealthChat";
+import { useState } from "react";
 
 const HealthAssistant = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "Hello! I'm your AI Health Assistant. I can help answer questions about symptoms, diseases, and general health advice. How can I assist you today?"
-    }
-  ]);
+  const { messages, sendMessage, isLoading } = useHealthChat();
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!input.trim()) return;
-
-    const userMessage = input.trim();
+    sendMessage(input.trim());
     setInput("");
-    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
-    setIsLoading(true);
-
-    // TODO: Integrate with AI backend
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: "I'm currently a demo interface. To enable real AI responses, we'll need to integrate with Lovable Cloud and configure the AI backend. Would you like me to set that up?"
-      }]);
-      setIsLoading(false);
-    }, 1000);
   };
 
   return (
@@ -117,7 +95,7 @@ const HealthAssistant = () => {
                     placeholder="Ask about symptoms, diseases, or health advice..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSend()}
+                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
                     className="flex-1"
                   />
                   <Button 
