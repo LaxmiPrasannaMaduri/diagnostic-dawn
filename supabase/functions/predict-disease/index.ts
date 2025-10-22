@@ -9,28 +9,60 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { diseaseType, parameters } = await req.json();
+    const { diseaseType, parameters, imageData } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     let systemPrompt = "";
-    let userPrompt = "";
+    let messages: any[] = [];
 
     switch (diseaseType) {
       case "heart":
         systemPrompt = "You are a medical AI specialized in cardiovascular disease risk assessment. Analyze the provided health parameters and provide a risk assessment with percentage, risk level (Low/Medium/High), key factors, and recommendations.";
-        userPrompt = `Analyze heart disease risk based on these parameters: Age: ${parameters.age}, Gender: ${parameters.gender}, Chest Pain Type: ${parameters.chestPain}, Resting BP: ${parameters.restingBP}, Cholesterol: ${parameters.cholesterol}, Fasting Blood Sugar: ${parameters.fastingBS}, Max Heart Rate: ${parameters.maxHR}, Exercise Angina: ${parameters.exerciseAngina}. Provide a JSON response with: riskPercentage (number), riskLevel (Low/Medium/High), keyFactors (array of strings), recommendations (array of strings).`;
+        messages = [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Analyze heart disease risk based on these parameters: Age: ${parameters.age}, Gender: ${parameters.gender}, Chest Pain Type: ${parameters.chestPain}, Resting BP: ${parameters.restingBP}, Cholesterol: ${parameters.cholesterol}, Fasting Blood Sugar: ${parameters.fastingBS}, Max Heart Rate: ${parameters.maxHR}, Exercise Angina: ${parameters.exerciseAngina}. Provide a JSON response with: riskPercentage (number), riskLevel (Low/Medium/High), keyFactors (array of strings), recommendations (array of strings).` }
+        ];
         break;
       
       case "kidney":
         systemPrompt = "You are a medical AI specialized in chronic kidney disease assessment. Analyze the provided health parameters and provide a risk assessment with percentage, risk level (Low/Medium/High), key factors, and recommendations.";
-        userPrompt = `Analyze CKD risk based on these parameters: Age: ${parameters.age}, Blood Pressure: ${parameters.bp}, Specific Gravity: ${parameters.sg}, Albumin: ${parameters.albumin}, Sugar: ${parameters.sugar}, Red Blood Cells: ${parameters.rbc}, Serum Creatinine: ${parameters.sc}, Sodium: ${parameters.sod}, Potassium: ${parameters.pot}, Hemoglobin: ${parameters.hemo}, White Blood Cell Count: ${parameters.wbcc}, Red Blood Cell Count: ${parameters.rbcc}. Provide a JSON response with: riskPercentage (number), riskLevel (Low/Medium/High), keyFactors (array of strings), recommendations (array of strings).`;
+        messages = [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Analyze CKD risk based on these parameters: Age: ${parameters.age}, Blood Pressure: ${parameters.bp}, Specific Gravity: ${parameters.sg}, Albumin: ${parameters.albumin}, Sugar: ${parameters.sugar}, Red Blood Cells: ${parameters.rbc}, Serum Creatinine: ${parameters.sc}, Sodium: ${parameters.sod}, Potassium: ${parameters.pot}, Hemoglobin: ${parameters.hemo}, White Blood Cell Count: ${parameters.wbcc}, Red Blood Cell Count: ${parameters.rbcc}. Provide a JSON response with: riskPercentage (number), riskLevel (Low/Medium/High), keyFactors (array of strings), recommendations (array of strings).` }
+        ];
         break;
       
       case "diabetes":
         systemPrompt = "You are a medical AI specialized in diabetes risk assessment. Analyze the provided health parameters and provide a risk assessment with percentage, risk level (Low/Medium/High), key factors, and recommendations.";
-        userPrompt = `Analyze diabetes risk based on these parameters: Age: ${parameters.age}, Gender: ${parameters.gender}, BMI: ${parameters.bmi}, Blood Glucose: ${parameters.bloodGlucose}, Blood Pressure: ${parameters.bloodPressure}, Insulin: ${parameters.insulin}, Family History: ${parameters.familyHistory}, Physical Activity: ${parameters.physicalActivity}. Provide a JSON response with: riskPercentage (number), riskLevel (Low/Medium/High), keyFactors (array of strings), recommendations (array of strings).`;
+        messages = [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Analyze diabetes risk based on these parameters: Age: ${parameters.age}, Gender: ${parameters.gender}, BMI: ${parameters.bmi}, Blood Glucose: ${parameters.bloodGlucose}, Blood Pressure: ${parameters.bloodPressure}, Insulin: ${parameters.insulin}, Family History: ${parameters.familyHistory}, Physical Activity: ${parameters.physicalActivity}. Provide a JSON response with: riskPercentage (number), riskLevel (Low/Medium/High), keyFactors (array of strings), recommendations (array of strings).` }
+        ];
+        break;
+      
+      case "skin":
+        if (!imageData) throw new Error("Image data is required for skin disease prediction");
+        systemPrompt = "You are a medical AI specialized in dermatology and skin disease diagnosis. Analyze the provided skin image and provide a detailed assessment with diagnosis, confidence level, key observations, and recommendations.";
+        messages = [
+          { role: "system", content: systemPrompt },
+          { 
+            role: "user", 
+            content: [
+              {
+                type: "text",
+                text: "Analyze this skin image and identify potential skin conditions or diseases. Provide a JSON response with: riskPercentage (confidence level as number), riskLevel (Low/Medium/High based on severity), keyFactors (array of visible symptoms/observations), recommendations (array of advice and next steps)."
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: imageData
+                }
+              }
+            ]
+          }
+        ];
         break;
       
       default:
@@ -45,10 +77,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
+        messages: messages,
       }),
     });
 

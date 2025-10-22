@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import HeartPredictionForm from "@/components/prediction/HeartPredictionForm";
 import KidneyPredictionForm from "@/components/prediction/KidneyPredictionForm";
 import DiabetesPredictionForm from "@/components/prediction/DiabetesPredictionForm";
+import SkinPredictionForm from "@/components/prediction/SkinPredictionForm";
 
 const Predict = () => {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ const Predict = () => {
         return <KidneyPredictionForm />;
       case "diabetes":
         return <DiabetesPredictionForm />;
+      case "skin":
+        return <SkinPredictionForm />;
       default:
         return <div className="text-center text-muted-foreground">Invalid disease type</div>;
     }

@@ -3,6 +3,7 @@ import { Activity } from "lucide-react";
 import heartIcon from "@/assets/heart-icon.png";
 import kidneyIcon from "@/assets/kidney-icon.png";
 import diabetesIcon from "@/assets/diabetes-icon.png";
+import skinIcon from "@/assets/skin-icon.png";
 import { useNavigate } from "react-router-dom";
 
 const PredictionSection = () => {
@@ -27,6 +28,12 @@ const PredictionSection = () => {
       icon: diabetesIcon,
       type: "diabetes",
     },
+    {
+      title: "Skin Disease",
+      description: "Analyze skin conditions and detect potential dermatological issues from images",
+      icon: skinIcon,
+      type: "skin",
+    },
   ];
 
   const handlePredictionClick = (diseaseType: string) => {
@@ -49,7 +56,7 @@ const PredictionSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
           {diseases.map((disease) => (
             <DiseaseCard
               key={disease.title}
